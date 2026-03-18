@@ -12,10 +12,19 @@ jobs:
   triage:
     runs-on: ubuntu-latest
     steps:
+      - name: Harden runner
+        uses: step-security/harden-runner@v2
+        with:
+          egress-policy: audit
+          allowed-endpoints: >
+            api.github.com:443
+            github.com:443
+
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          persist-credentials: false
 
       - name: Debug payload
         run: |
@@ -46,31 +55,30 @@ jobs:
           echo "issue_number=$ISSUE_NUMBER" >> $GITHUB_OUTPUT
           echo "✅ Issue #$ISSUE_NUMBER created: $ISSUE_URL"
 
-      - name: Install Copilot CLI
-        run: gh extension install github/gh-copilot
-        env:
-          GH_TOKEN: ${{ secrets.COPILOT_TOKEN }}
-
       - name: Run Copilot analysis
         id: analysis
         env:
           GH_TOKEN: ${{ secrets.COPILOT_TOKEN }}
         run: |
-          gh copilot explain "You are a senior engineer performing first triage on a bug report.
+          gh copilot explain \
+            "You are a senior engineer performing first triage on a bug report.
 
-          Bug ID: ${{ github.event.client_payload.jira_key }}
-          Summary: ${{ github.event.client_payload.summary }}
-          Description: ${{ github.event.client_payload.description }}
+            Bug ID: ${{ github.event.client_payload.jira_key }}
+            Summary: ${{ github.event.client_payload.summary }}
+            Description: ${{ github.event.client_payload.description }}
 
-          Please analyze this bug and provide:
-          1. Which files or modules in this repository are most likely involved
-          2. Probable root causes based on the description
-          3. Any recent commits that may be relevant (check git log)
-          4. Suggested first debugging steps for the engineer picking this up
+            Please analyze this bug and provide:
+            1. Which files or modules in this repository are most likely involved
+            2. Probable root causes based on the description
+            3. Any recent commits that may be relevant (check git log)
+            4. Suggested first debugging steps for the engineer picking this up
 
-          Be specific about file paths where possible." > raw_analysis.txt
+            Be specific about file paths where possible.
 
-          # Format the output as a markdown comment
+            IMPORTANT: Only read files and git history. Do not execute,
+            modify, or create any files. Do not run any shell commands
+            beyond git log and git diff." > raw_analysis.txt
+
           cat > analysis.md << 'EOF'
           ## 🤖 Copilot First Response
 
