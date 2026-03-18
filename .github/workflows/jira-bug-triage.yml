@@ -60,7 +60,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.COPILOT_TOKEN }}
         run: |
-          gh copilot explain \
+          gh copilot suggest -t shell -p \
             "You are a senior engineer performing first triage on a bug report.
 
             Bug ID: ${{ github.event.client_payload.jira_key }}
