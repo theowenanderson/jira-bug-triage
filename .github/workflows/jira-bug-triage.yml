@@ -56,7 +56,9 @@ jobs:
           echo "✅ Issue #$ISSUE_NUMBER created: $ISSUE_URL"
 
       - name: Install Copilot CLI
-        run: npm install -g @github/copilot-cli          
+        run: |
+          node --version
+          npm install -g @github/copilot
 
       - name: Run Copilot analysis
         id: analysis
