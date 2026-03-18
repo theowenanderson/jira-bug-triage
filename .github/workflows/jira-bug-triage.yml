@@ -55,6 +55,11 @@ jobs:
           echo "issue_number=$ISSUE_NUMBER" >> $GITHUB_OUTPUT
           echo "✅ Issue #$ISSUE_NUMBER created: $ISSUE_URL"
 
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          
       - name: Install Copilot CLI
         run: |
           node --version
