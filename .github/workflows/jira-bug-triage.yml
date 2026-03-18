@@ -1,0 +1,37 @@
+name: Jira Bug Triage
+
+on:
+  workflow_dispatch:
+  repository_dispatch:
+    types: [jira-bug-created]
+
+permissions:
+  issues: write
+  contents: read
+
+jobs:
+  triage:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Debug payload
+        run: |
+          echo "Jira Key: ${{ github.event.client_payload.jira_key }}"
+          echo "Summary: ${{ github.event.client_payload.summary }}"
+          echo "Reporter: ${{ github.event.client_payload.reporter }}"
+
+      - name: Create GitHub Issue
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh issue create \
+            --repo ${{ github.repository }} \
+            --title "[${{ github.event.client_payload.jira_key }}] ${{ github.event.client_payload.summary }}" \
+            --body "**Jira Ticket:** ${{ github.event.client_payload.url }}
+
+          **Reporter:** ${{ github.event.client_payload.reporter }}
+          **Priority:** ${{ github.event.client_payload.priority }}
+
+          ---
+
+          ${{ github.event.client_payload.description }}" \
+            --label "bug"
